@@ -1,0 +1,96 @@
+# ==============================================================
+# AI-Powered Lie Detection System — .gitignore
+# ==============================================================
+
+# ─── Python ───────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ─── Virtual Environment ──────────────────────────────────────
+venv/
+env/
+.venv/
+ENV/
+
+# ─── Environment Variables (NEVER commit these) ───────────────
+.env
+.env.local
+.env.*.local
+
+# ─── Model Files (large binary files) ────────────────────────
+models/
+*.pkl
+*.pth
+*.h5
+*.ckpt
+*.bin
+*.safetensors
+checkpoints/
+
+# ─── Data (raw/processed datasets) ───────────────────────────
+data/raw/
+data/processed/
+data/audio/uploads/
+data/custom/recordings/
+*.csv
+*.tsv
+*.jsonl
+
+# ─── Cache ────────────────────────────────────────────────────
+.cache/
+*.cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ─── Logs ─────────────────────────────────────────────────────
+logs/
+*.log
+mlruns/
+wandb/
+
+# ─── Reports & Plots ──────────────────────────────────────────
+reports/plots/
+reports/*.json
+
+# ─── Jupyter Notebooks checkpoints ───────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ─── OS Files ─────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# ─── IDE ──────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ─── HuggingFace cache ────────────────────────────────────────
+.cache/huggingface/
+
+# ─── SQLite DB ────────────────────────────────────────────────
+*.db
+*.sqlite3
+
+# ─── Uploaded audio files ─────────────────────────────────────
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.m4a

@@ -1,0 +1,128 @@
+# ═══════════════════════════════════════════════════════════════
+# docker-compose.yml — AI-Powered Lie Detection System
+# Orchestrates API, Dashboard, Redis, and MLflow
+# ═══════════════════════════════════════════════════════════════
+
+version: "3.9"
+
+services:
+
+  # ── FastAPI Backend ──────────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: mlops/Dockerfile
+    image: lie-detection-api:latest
+    container_name: liedetect-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../models:/app/models:ro
+      - ../data:/app/data
+      - ../logs:/app/logs
+      - ../configs:/app/configs:ro
+    environment:
+      - APP_ENV=production
+      - DEBUG=false
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=json
+      - LOG_FILE=logs/api.log
+    env_file:
+      - ../.env
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - liedetect-network
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+
+  # ── Streamlit Dashboard ──────────────────────────────────────
+  dashboard:
+    build:
+      context: ..
+      dockerfile: mlops/Dockerfile.dashboard
+    image: lie-detection-dashboard:latest
+    container_name: liedetect-dashboard
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    volumes:
+      - ../dashboard:/app/dashboard:ro
+    environment:
+      - API_BASE_URL=http://api:8000
+      - STREAMLIT_SERVER_PORT=8501
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - liedetect-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2G
+
+  # ── Redis (caching) ─────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: liedetect-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - liedetect-network
+
+  # ── MLflow Tracking ─────────────────────────────────────────
+  mlflow:
+    image: python:3.11-slim
+    container_name: liedetect-mlflow
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-data:/mlflow
+    command: >
+      bash -c "pip install -q mlflow &&
+               mlflow server --host 0.0.0.0 --port 5000
+               --backend-store-uri /mlflow/backend
+               --default-artifact-root /mlflow/artifacts"
+    networks:
+      - liedetect-network
+    profiles:
+      - mlops  # only start with: docker-compose --profile mlops up
+
+# ── Volumes ──────────────────────────────────────────────────
+volumes:
+  redis-data:
+    name: liedetect-redis-data
+  mlflow-data:
+    name: liedetect-mlflow-data
+
+# ── Networks ─────────────────────────────────────────────────
+networks:
+  liedetect-network:
+    name: liedetect-net
+    driver: bridge

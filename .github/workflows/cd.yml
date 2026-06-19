@@ -1,0 +1,100 @@
+# ═══════════════════════════════════════════════════════════════
+# CD Pipeline — AI-Powered Lie Detection System
+# GitHub Actions: Build → Push to ECR → Deploy to ECS (AWS)
+# ═══════════════════════════════════════════════════════════════
+
+name: CD Pipeline — Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*.*.*"
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY_API: lie-detection-api
+  ECR_REPOSITORY_DASHBOARD: lie-detection-dashboard
+  ECS_CLUSTER: lie-detection-cluster
+  ECS_SERVICE_API: lie-detection-api-service
+  ECS_SERVICE_DASHBOARD: lie-detection-dashboard-service
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to AWS ECS
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Configure AWS Credentials ─────────────────────────
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ── Login to ECR ──────────────────────────────────────
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ── Build & Push API Image ────────────────────────────
+      - name: Build, tag, and push API image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            -f mlops/Dockerfile \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY_API:latest \
+            .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:latest
+          echo "api_image=$ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # ── Build & Push Dashboard Image ──────────────────────
+      - name: Build, tag, and push Dashboard image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            -f mlops/Dockerfile.dashboard \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY_DASHBOARD:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY_DASHBOARD:latest \
+            .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_DASHBOARD:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_DASHBOARD:latest
+
+      # ── Deploy API Service to ECS ─────────────────────────
+      - name: Deploy API to ECS
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE_API }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      # ── Deploy Dashboard Service to ECS ───────────────────
+      - name: Deploy Dashboard to ECS
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE_DASHBOARD }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      # ── Wait for stability ────────────────────────────────
+      - name: Wait for API service to stabilize
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE_API }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Deployment success notification
+        run: echo "✅ Deployment to AWS ECS completed successfully!"

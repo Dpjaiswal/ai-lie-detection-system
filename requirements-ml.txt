@@ -1,0 +1,41 @@
+# ==============================================================
+# ML Training Requirements (Heavy — install when training models)
+# pip install -r requirements-ml.txt
+# ==============================================================
+
+# ─── Core (must install requirements.txt first) ───────────────
+-r requirements.txt
+
+# ─── Transformers & PyTorch ───────────────────────────────────
+torch>=2.1.0
+torchvision>=0.16.0
+torchaudio>=2.1.0
+transformers>=4.35.0
+tokenizers>=0.14.0
+datasets>=2.14.0
+sentence-transformers>=2.2.2
+safetensors>=0.4.0
+accelerate>=0.24.0
+
+# ─── NLP Full ─────────────────────────────────────────────────
+spacy>=3.7.0
+# After install: python -m spacy download en_core_web_sm
+gensim>=4.3.0
+
+# ─── Audio Deep Learning ──────────────────────────────────────
+webrtcvad>=2.0.10
+# praat-parselmouth: requires brew install praat first
+# praat-parselmouth>=0.4.3
+
+# ─── XAI ──────────────────────────────────────────────────────
+shap>=0.43.0
+lime>=0.2.0.1
+# captum>=0.6.0   # PyTorch XAI — optional
+
+# ─── MLOps & Tracking ─────────────────────────────────────────
+mlflow>=2.8.0
+optuna>=3.4.0
+# wandb>=0.16.0   # Weights & Biases — needs WANDB_API_KEY
+
+# ─── lightgbm (optional, alternative to xgboost) ─────────────
+lightgbm>=4.1.0

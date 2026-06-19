@@ -1,0 +1,165 @@
+# ═══════════════════════════════════════════════════════════════
+# CI Pipeline — AI-Powered Lie Detection System
+# GitHub Actions: lint → test → build Docker image on every PR
+# ═══════════════════════════════════════════════════════════════
+
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  PYTHON_VERSION: "3.11"
+  DOCKER_IMAGE_API: lie-detection-api
+  DOCKER_IMAGE_DASHBOARD: lie-detection-dashboard
+
+jobs:
+  # ── Code Quality ──────────────────────────────────────────
+  lint:
+    name: 🔍 Lint & Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install linting tools
+        run: pip install black isort flake8 mypy
+
+      - name: Check formatting (black)
+        run: black --check src/ api/ dashboard/ tests/
+
+      - name: Check import sorting (isort)
+        run: isort --check-only src/ api/ dashboard/ tests/
+
+      - name: Lint (flake8)
+        run: flake8 src/ api/ dashboard/ tests/ --max-line-length=120 --ignore=E203,W503
+
+  # ── Unit Tests ────────────────────────────────────────────
+  test:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsndfile1 ffmpeg
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install fastapi uvicorn pydantic httpx pytest pytest-asyncio pytest-cov
+          pip install numpy scikit-learn loguru python-dotenv pyyaml
+          pip install librosa soundfile scipy
+
+      - name: Copy env file
+        run: cp .env.example .env
+
+      - name: Run unit tests
+        run: |
+          pytest tests/ -v \
+            --cov=src \
+            --cov=api \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --timeout=60 \
+            -x
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.11'
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  # ── API Smoke Test ────────────────────────────────────────
+  api-smoke-test:
+    name: 🌐 API Smoke Test
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y libsndfile1
+          pip install fastapi uvicorn pydantic httpx numpy scikit-learn \
+                      loguru python-dotenv pyyaml librosa soundfile scipy
+
+      - name: Copy env
+        run: cp .env.example .env
+
+      - name: Start API server
+        run: |
+          uvicorn api.main:app --host 0.0.0.0 --port 8000 &
+          sleep 8
+
+      - name: Test health endpoint
+        run: curl -f http://localhost:8000/health
+
+      - name: Test text prediction
+        run: |
+          curl -X POST http://localhost:8000/predict/text \
+            -H "Content-Type: application/json" \
+            -d '{"text": "I was at home all evening", "model": "baseline"}' | python -m json.tool
+
+  # ── Docker Build ──────────────────────────────────────────
+  docker-build:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    needs: api-smoke-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: mlops/Dockerfile
+          push: false
+          tags: ${{ env.DOCKER_IMAGE_API }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Dashboard image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: mlops/Dockerfile.dashboard
+          push: false
+          tags: ${{ env.DOCKER_IMAGE_DASHBOARD }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

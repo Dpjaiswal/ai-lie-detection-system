@@ -1,0 +1,73 @@
+# training_config.yaml — Training Pipeline Configuration
+
+# ─── Data Settings ────────────────────────────────────────────
+data:
+  text_dataset: liar  # liar | custom | combined
+  audio_dataset: ravdess  # ravdess | cremad | combined
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  random_seed: 42
+  max_text_length: 512
+  max_audio_duration: 30  # seconds
+  text_data_path: data/processed/text
+  audio_data_path: data/processed/audio
+  cache_dir: .cache/datasets
+
+# ─── Preprocessing ────────────────────────────────────────────
+preprocessing:
+  text:
+    lowercase: true
+    remove_html: true
+    remove_urls: true
+    remove_special_chars: true
+    remove_stopwords: false  # Keep for transformers
+    lemmatize: true
+    min_word_length: 2
+    max_sequence_length: 512
+  audio:
+    target_sample_rate: 22050
+    normalize: true
+    noise_reduction: true
+    silence_removal: true
+    min_duration: 1.0
+    max_duration: 30.0
+    augmentation:
+      enabled: true
+      time_stretch: [0.8, 1.2]
+      pitch_shift: [-2, 2]
+      add_noise: 0.005
+
+# ─── Training Pipeline ────────────────────────────────────────
+pipeline:
+  phases:
+    - name: baseline_nlp
+      models: [tfidf_lr, tfidf_xgb, word2vec_xgb]
+      enabled: true
+    - name: transformer_nlp
+      models: [bert, roberta, deberta]
+      enabled: true
+    - name: audio_classical
+      models: [rf, svm, xgb]
+      enabled: true
+    - name: audio_deep
+      models: [cnn, lstm, cnn_lstm]
+      enabled: true
+    - name: fusion
+      methods: [early, late, hybrid]
+      enabled: true
+
+# ─── Experiment Tracking ──────────────────────────────────────
+tracking:
+  backend: mlflow  # mlflow | wandb | none
+  experiment_name: lie-detection-v1
+  log_every_n_steps: 50
+  save_model_on_improve: true
+
+# ─── Output ───────────────────────────────────────────────────
+output:
+  model_dir: models/
+  report_dir: reports/
+  log_dir: logs/
+  checkpoint_dir: checkpoints/
+  results_file: reports/evaluation_results.json

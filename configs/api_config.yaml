@@ -1,0 +1,50 @@
+# api_config.yaml — FastAPI Server Configuration
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  reload: false
+  log_level: info
+  access_log: true
+
+cors:
+  allow_origins:
+    - "http://localhost:8501"
+    - "http://localhost:3000"
+    - "http://127.0.0.1:8501"
+  allow_credentials: true
+  allow_methods: ["*"]
+  allow_headers: ["*"]
+
+rate_limiting:
+  enabled: true
+  requests_per_minute: 60
+  burst_size: 20
+
+upload:
+  max_file_size_mb: 50
+  allowed_audio_formats: [".wav", ".mp3", ".ogg", ".flac", ".m4a"]
+  upload_dir: "data/audio/uploads"
+  cleanup_after_hours: 24
+
+inference:
+  text_timeout_seconds: 10
+  audio_timeout_seconds: 30
+  multimodal_timeout_seconds: 45
+  batch_size: 1
+  device: "cpu"  # cpu | cuda | mps
+
+cache:
+  enabled: true
+  backend: redis  # redis | memory
+  ttl_seconds: 3600
+
+security:
+  enable_api_key: false
+  api_key_header: "X-API-Key"
+  enable_jwt: false
+
+monitoring:
+  prometheus_enabled: false
+  health_check_interval: 30
