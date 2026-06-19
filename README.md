@@ -335,6 +335,26 @@ result = explainer.explain_instance(x_audio)
 
 ---
 
+## 📝 Example Test Cases
+
+You can test the API or Dashboard with these sample statements. Note that the model looks for linguistic cues (e.g., over-justification, distancing language, absolute terms).
+
+### 🔴 Likely Deceptive (Expected: Lie)
+1. **The Alibi:** "I was definitely at home the entire night and never left, not even once. You can ask my dog."
+2. **The Denial:** "I have absolutely no idea how that money disappeared from the account, I swear I never touched it."
+3. **The Distancing:** "I never met that person in my entire life, I don't even know who they are talking about."
+4. **The Over-Justification:** "I am always completely honest. Everyone knows I am the most trustworthy person in this office, so I wouldn't do that."
+5. **The Evasion:** "I categorically did not send that email to the competitor, I wasn't even near my computer at that time of the day."
+
+### 🟢 Likely Truthful (Expected: Truth)
+6. **Routine Action:** "I went to the grocery store around 3pm, bought some milk and bread, and came back home by 4."
+7. **Admitting Minor Fault:** "I forgot to submit the report on Friday because I had a doctor's appointment in the afternoon and completely lost track of time."
+8. **Simple Fact:** "The meeting was rescheduled to Tuesday. I got the notification but missed forwarding it to the team."
+9. **Taking Responsibility:** "I made a mistake in the calculation. I used last month's figures instead of this month's spreadsheet."
+10. **Direct Explanation:** "I arrived late to the office because the train was delayed by about 20 minutes at the Central station."
+
+---
+
 ## 🔭 Research Extensions
 
 | Direction | Technology | Expected Gain |
