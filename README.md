@@ -36,47 +36,69 @@ A complete end-to-end AI pipeline that:
 
 ## 🏗 Architecture
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                        INPUT LAYER                           │
-│   Text Statement              Voice Recording / Microphone   │
-└──────────┬────────────────────────────────┬─────────────────┘
-           │                                │
-    ┌──────▼──────┐                  ┌──────▼──────┐
-    │ NLP Pipeline │                  │Audio Pipeline│
-    │             │                  │             │
-    │ TF-IDF → LR │                  │MFCC+Chroma  │
-    │ Word2Vec+XGB│                  │Pitch+Jitter │
-    │ RoBERTa     │                  │Shimmer+RMS  │
-    │ DeBERTa     │                  │CNN-LSTM     │
-    └──────┬──────┘                  └──────┬──────┘
-           │                                │
-    ┌──────▼────────────────────────────────▼──────┐
-    │            MULTI-MODAL FUSION LAYER           │
-    │  Early Fusion │ Late Fusion │ Hybrid Attention│
-    └──────────────────────────┬───────────────────┘
-                               │
-    ┌──────────────────────────▼───────────────────┐
-    │         EXPLAINABILITY + OUTPUT LAYER         │
-    │   SHAP Values │ LIME Words │ Feature Importance│
-    │   Final Verdict │ Confidence Score            │
-    └──────────────────────────────────────────────┘
-                               │
-              ┌────────────────▼────────────────┐
-              │       FastAPI REST API           │
-              │  POST /predict/text              │
-              │  POST /predict/audio             │
-              │  POST /predict/multimodal        │
-              │  POST /explain                   │
-              │  GET  /health                    │
-              │  WS   /ws/predict/realtime       │
-              └────────────────┬────────────────┘
-                               │
-              ┌────────────────▼────────────────┐
-              │     Streamlit Dashboard          │
-              │  Text Analysis │ Audio Analysis  │
-              │  Multimodal    │ Analytics       │
-              └─────────────────────────────────┘
+```mermaid
+graph TD
+    classDef input fill:#1E293B,stroke:#3B82F6,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
+    classDef processing fill:#1E293B,stroke:#10B981,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
+    classDef fusion fill:#1E293B,stroke:#F59E0B,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
+    classDef output fill:#1E293B,stroke:#EF4444,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
+    classDef system fill:#0F172A,stroke:#64748B,stroke-width:1px,color:#F8FAFC,rx:15,ry:15;
+
+    subgraph Input_Layer ["📥 Data Input"]
+        direction LR
+        T["📝 Text Statement"]:::input
+        V["🎙️ Voice Recording"]:::input
+    end
+
+    subgraph Core_Pipelines ["⚙️ Feature Pipelines"]
+        direction LR
+        subgraph NLP_Pipeline ["🧠 NLP Analysis"]
+            direction TB
+            N1["TF-IDF → LR"]:::processing
+            N2["BERT / RoBERTa"]:::processing
+            N3["DeBERTa Tuning"]:::processing
+        end
+
+        subgraph Audio_Pipeline ["🔊 Audio Analysis"]
+            direction TB
+            A1["MFCC + Chroma"]:::processing
+            A2["Pitch + Jitter"]:::processing
+            A3["CNN-LSTM"]:::processing
+        end
+    end
+
+    subgraph Fusion_Layer ["🔀 Multi-Modal Fusion"]
+        F1["Late Fusion (Voting)"]:::fusion
+        F2["Early Fusion (Concat)"]:::fusion
+        F3["Hybrid Cross-Modal Attention"]:::fusion
+    end
+
+    subgraph Explainability ["🔍 Explainability & Verdict"]
+        direction LR
+        X1["LIME (Word Importance)"]:::output
+        X2["SHAP (Feature Importance)"]:::output
+        O1["📊 Confidence Score"]:::output
+        O2["✅ Final Verdict"]:::output
+    end
+
+    subgraph APIs ["🚀 Deployment"]
+        direction LR
+        API["⚡ FastAPI (REST & WS)"]:::system
+        UI["🖥️ Streamlit Dashboard"]:::system
+    end
+
+    T --> NLP_Pipeline
+    V --> Audio_Pipeline
+
+    N1 & N2 & N3 --> F1 & F2 & F3
+    A1 & A2 & A3 --> F1 & F2 & F3
+
+    F1 & F2 & F3 --> X1 & X2 & O1 & O2
+
+    X1 & X2 & O1 & O2 --> API
+    API <--> UI
+
+    class Input_Layer,Core_Pipelines,Fusion_Layer,Explainability,APIs system;
 ```
 
 ---
