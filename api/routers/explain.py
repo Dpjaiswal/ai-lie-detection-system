@@ -11,6 +11,7 @@ from fastapi import APIRouter, HTTPException
 from api.models.request_models import ExplainRequest
 from api.models.response_models import ExplainResponse, ExplanationResponse, WordImportance, AudioFeatureImportance
 from src.utils.logger import logger
+from api.routers.predict import _generate_dynamic_text_explanation, _generate_dynamic_audio_explanation
 
 router = APIRouter(tags=["Explainability"])
 
@@ -39,20 +40,19 @@ async def explain_prediction(request: ExplainRequest) -> ExplainResponse:
         if request.text and request.model_type in ("text", "fusion"):
             if request.method in ("lime", "both"):
                 methods_used.append("lime_text")
+                # In production, integrate actual TextLIMEExplainer here
                 text_explanation = ExplanationResponse(
                     method_used="lime",
-                    important_words=[
-                        WordImportance(word="definitely", weight=0.15, direction="lie"),
-                        WordImportance(word="never", weight=0.12, direction="lie"),
-                        WordImportance(word="honest", weight=-0.09, direction="truth"),
-                        WordImportance(word="because", weight=-0.06, direction="truth"),
-                    ],
+                    important_words=_generate_dynamic_text_explanation(request.text, lie_prob=0.6)
                 )
 
             if request.method in ("shap", "both"):
                 methods_used.append("shap_text")
                 if text_explanation is None:
-                    text_explanation = ExplanationResponse(method_used="shap")
+                    text_explanation = ExplanationResponse(
+                        method_used="shap",
+                        important_words=_generate_dynamic_text_explanation(request.text, lie_prob=0.6)[:3]
+                    )
                 text_explanation.method_used = "lime+shap" if "lime_text" in methods_used else "shap"
 
         # ── Audio Explanation ─────────────────────────────────
@@ -61,13 +61,7 @@ async def explain_prediction(request: ExplainRequest) -> ExplainResponse:
                 methods_used.append("shap_audio")
                 audio_explanation = ExplanationResponse(
                     method_used="shap",
-                    audio_features=[
-                        AudioFeatureImportance(feature="pitch_mean", shap_value=0.22, direction="stress_detected"),
-                        AudioFeatureImportance(feature="jitter_local", shap_value=0.18, direction="stress_detected"),
-                        AudioFeatureImportance(feature="shimmer_local", shap_value=0.15, direction="stress_detected"),
-                        AudioFeatureImportance(feature="rms_mean", shap_value=-0.08, direction="calm"),
-                        AudioFeatureImportance(feature="pause_ratio", shap_value=0.10, direction="stress_detected"),
-                    ],
+                    audio_features=_generate_dynamic_audio_explanation(stress_prob=0.7)
                 )
 
         if not text_explanation and not audio_explanation:

@@ -79,6 +79,52 @@ def _mock_audio_predict(audio_bytes: bytes) -> tuple:
     return prediction, confidence, stress_prob
 
 
+def _generate_dynamic_text_explanation(text: str, lie_prob: float) -> list:
+    """Generate dynamic mock word importances from input text."""
+    words = [w for w in text.split() if len(w) > 3]
+    if not words:
+        words = text.split()
+    if not words:
+        return []
+    
+    num_important = min(5, len(words))
+    important_indices = np.random.choice(len(words), num_important, replace=False)
+    
+    importances = []
+    for idx in important_indices:
+        word = words[idx].strip('.,!?()[]"\'')
+        if not word:
+            continue
+        weight = float(np.random.uniform(0.01, 0.25))
+        if lie_prob > 0.5:
+            direction = "lie" if np.random.random() < 0.7 else "truth"
+        else:
+            direction = "truth" if np.random.random() < 0.7 else "lie"
+        importances.append(WordImportance(word=word, weight=weight, direction=direction))
+    
+    importances.sort(key=lambda x: x.weight, reverse=True)
+    return importances
+
+
+def _generate_dynamic_audio_explanation(stress_prob: float) -> list:
+    """Generate dynamic mock audio feature importances."""
+    features = ["pitch_mean", "jitter_local", "shimmer_local", "rms_mean", "pause_ratio", "mfcc_1", "mfcc_2"]
+    num_important = 4
+    selected = np.random.choice(features, num_important, replace=False)
+    
+    importances = []
+    for feat in selected:
+        weight = float(np.random.uniform(0.05, 0.30))
+        if stress_prob > 0.5:
+            direction = "stress_detected" if np.random.random() < 0.7 else "calm"
+        else:
+            direction = "calm" if np.random.random() < 0.7 else "stress_detected"
+        importances.append(AudioFeatureImportance(feature=feat, shap_value=weight, direction=direction))
+        
+    importances.sort(key=lambda x: x.shap_value, reverse=True)
+    return importances
+
+
 # ──────────────────────────────────────────────────────────────
 # POST /predict/text
 # ──────────────────────────────────────────────────────────────
@@ -116,11 +162,7 @@ async def predict_text(request: TextPredictRequest):
         if request.include_explanation:
             explanation = ExplanationResponse(
                 method_used="lime",
-                important_words=[
-                    WordImportance(word="definitely", weight=0.12, direction="lie"),
-                    WordImportance(word="never", weight=0.08, direction="lie"),
-                    WordImportance(word="always", weight=-0.05, direction="truth"),
-                ],
+                important_words=_generate_dynamic_text_explanation(request.text, lie_prob)
             )
 
         return TextPredictResponse(
@@ -213,11 +255,7 @@ async def predict_audio(
         if include_explanation:
             explanation = ExplanationResponse(
                 method_used="shap",
-                audio_features=[
-                    AudioFeatureImportance(feature="pitch_mean", shap_value=0.18, direction="stress_detected"),
-                    AudioFeatureImportance(feature="jitter_local", shap_value=0.14, direction="stress_detected"),
-                    AudioFeatureImportance(feature="rms_mean", shap_value=-0.06, direction="calm"),
-                ],
+                audio_features=_generate_dynamic_audio_explanation(stress_prob)
             )
 
         return AudioPredictResponse(
@@ -300,14 +338,8 @@ async def predict_multimodal(
         if include_explanation:
             explanation = ExplanationResponse(
                 method_used="hybrid_shap_lime",
-                important_words=[
-                    WordImportance(word="definitely", weight=0.12, direction="lie"),
-                    WordImportance(word="never", weight=0.09, direction="lie"),
-                ],
-                audio_features=[
-                    AudioFeatureImportance(feature="pitch_mean", shap_value=0.18, direction="stress_detected"),
-                    AudioFeatureImportance(feature="jitter_local", shap_value=0.14, direction="stress_detected"),
-                ],
+                important_words=_generate_dynamic_text_explanation(text, text_lie_prob)[:3],
+                audio_features=_generate_dynamic_audio_explanation(audio_stress_prob)[:3]
             )
 
         processing_time = (time.time() - start_time) * 1000
