@@ -103,6 +103,113 @@ graph TD
 
 ---
 
+## 📊 Relational Database Schema (ER Diagram)
+
+While the default system serves predictions statelessly, production deployments integrate a relational database to log predictions, audit sessions, and track long-term statistics. Below is the designed schema:
+
+```mermaid
+erDiagram
+    USERS ||--o{ SESSIONS : conducts
+    SESSIONS ||--o{ STATEMENTS : contains
+    STATEMENTS ||--|| PREDICTIONS : analyzes
+    PREDICTIONS ||--|| EXPLANATIONS : explains
+
+    USERS {
+        int id PK
+        string username
+        string password_hash
+        string role
+        datetime created_at
+    }
+
+    SESSIONS {
+        string session_id PK
+        int interviewer_id FK
+        string participant_name
+        string notes
+        datetime created_at
+    }
+
+    STATEMENTS {
+        string statement_id PK
+        string session_id FK
+        string text_content
+        string audio_path
+        datetime timestamp
+    }
+
+    PREDICTIONS {
+        string prediction_id PK
+        string statement_id FK
+        string text_prediction
+        float lie_probability
+        float truth_probability
+        string voice_prediction
+        float stress_probability
+        string final_prediction
+        float confidence
+        string fusion_method
+        float processing_time_ms
+        datetime created_at
+    }
+
+    EXPLANATIONS {
+        string explanation_id PK
+        string prediction_id FK
+        string method_used
+        json important_words
+        json audio_features
+    }
+```
+
+---
+
+## 🔄 System Run-time Flow
+
+The sequence diagram below illustrates the end-to-end communication flow between the user, frontend dashboard, backend API, caching layer, and machine learning components:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant UI as Streamlit Dashboard
+    participant API as FastAPI Gateway
+    participant Cache as Redis
+    participant NLP as RoBERTa NLP Pipeline
+    participant Audio as CNN-LSTM Audio Pipeline
+    participant Fusion as Multimodal Fusion
+
+    User->>UI: Submit Text + Audio Recording
+    UI->>API: POST /predict/multimodal (FormData)
+    API->>Cache: Check for cached prediction
+    alt Cache Hit
+        Cache-->>API: Return cached result
+    else Cache Miss
+        par Text Pipeline
+            API->>NLP: Predict lie probability
+            NLP-->>API: Return text scores & LIME weights
+        and Audio Pipeline
+            API->>Audio: Extract features & predict stress
+            Audio-->>API: Return stress scores & SHAP weights
+        end
+        API->>Fusion: Combine scores (Late/Hybrid Attention)
+        Fusion-->>API: Return final deception likelihood & verdict
+        API->>Cache: Cache results (TTL)
+    end
+    API-->>UI: Return JSON Response
+    UI-->>User: Render Gauge Meter, charts & Verdict
+```
+
+---
+
+## 🖥️ Streamlit Dashboard Preview
+
+Below is a preview of the Streamlit dashboard rendering the lie probability gauge and LIME word-level explanations in real-time:
+
+![Streamlit Dashboard Preview](docs/dashboard_preview.png)
+
+---
+
 ## 📁 Project Structure
 
 ```
