@@ -3,30 +3,30 @@
 # pip install -r requirements-optional.txt
 # ==============================================================
 
-# ─── Auth (JWT / password hashing) ───────────────────────────
+# --- Auth (JWT / password hashing) ----------------------------
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
 
-# ─── Database extras ──────────────────────────────────────────
+# --- Database extras ------------------------------------------
 sqlalchemy>=2.0.0
 alembic>=1.12.0
 redis>=5.0.1
 # pymongo>=4.6.0   # MongoDB (if needed)
 
-# ─── Microphone support ───────────────────────────────────────
-# REQUIRES: brew install portaudio   ← run this first on Mac
+# --- Microphone support ---------------------------------------
+# REQUIRES: brew install portaudio   <- run this first on Mac
 # pyaudio>=0.2.13
 # sounddevice>=0.4.6
 # streamlit-audiorecorder>=0.0.3
 # streamlit-webrtc>=0.47.0
 
-# ─── Extra visualization ──────────────────────────────────────
+# --- Extra visualization --------------------------------------
 bokeh>=3.3.0
 
-# ─── Config extras ────────────────────────────────────────────
+# --- Config extras --------------------------------------------
 omegaconf>=2.3.0
 # hydra-core>=1.3.2   # If using Hydra for config management
 
-# ─── Pre-commit hooks ─────────────────────────────────────────
+# --- Pre-commit hooks -----------------------------------------
 pre-commit>=3.5.0
 mypy>=1.6.0

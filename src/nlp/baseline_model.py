@@ -46,7 +46,6 @@ class TFIDFLogisticRegression:
             solver=lr_cfg.get("solver", "lbfgs"),
             class_weight=lr_cfg.get("class_weight", "balanced"),
             random_state=seed,
-            multi_class="ovr",
         )
         self.is_fitted = False
 

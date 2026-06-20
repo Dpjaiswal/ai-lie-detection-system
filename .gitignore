@@ -28,7 +28,7 @@ ENV/
 .env.*.local
 
 # ─── Model Files (large binary files) ────────────────────────
-models/
+/models/
 *.pkl
 *.pth
 *.h5
