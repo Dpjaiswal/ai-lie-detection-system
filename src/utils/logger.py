@@ -34,10 +34,10 @@ def setup_logger(
     # ── Console handler ───────────────────────────────────────
     if json_format:
         fmt = (
-            '{"time":"{time:YYYY-MM-DDTHH:mm:ss.SSSZ}",'
+            '{{"time":"{time:YYYY-MM-DDTHH:mm:ss.SSSZ}",'
             '"level":"{level}",'
             '"name":"{name}",'
-            '"message":"{message}"}'
+            '"message":"{message}"}}'
         )
     else:
         fmt = (
