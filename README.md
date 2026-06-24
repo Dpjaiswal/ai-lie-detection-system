@@ -29,7 +29,7 @@ A complete end-to-end AI pipeline that:
 - **Fuses both modalities** via cross-modal attention for a final verdict
 - Returns **confidence scores + LIME/SHAP explanations**
 - Exposes **production REST APIs** (FastAPI) with async handling
-- Ships with a **Streamlit dashboard** with dark UI and real-time charts
+- Ships with a **premium dark-theme Streamlit dashboard** featuring glassmorphism UI, preset scenarios, and an inline LIME text highlighter
 - Fully **Dockerized** with CI/CD via GitHub Actions
 
 ---
@@ -202,11 +202,26 @@ sequenceDiagram
 
 ---
 
-## 🖥️ Streamlit Dashboard Preview
+## 🖥️ Streamlit Dashboard
 
-Below is a preview of the Streamlit dashboard rendering the lie probability gauge and LIME word-level explanations in real-time:
+The dashboard has been fully redesigned with a **premium dark glassmorphism theme**. It runs entirely in **Demo Mode** (no API key required) using realistic mock predictions, making it easy to explore all features out of the box.
 
-![Streamlit Dashboard Preview](docs/dashboard_preview.png)
+### Dashboard Features
+
+| Feature | Description |
+|---|---|
+| **Demo Mode toggle** | Toggle between live API and offline mock predictions from the sidebar |
+| **Text Analysis tab** | Enter any statement + one-click Quick Fill presets (truthful & deceptive samples) |
+| **Audio Analysis tab** | Upload audio, record via mic, or select a Quick Load Demo Scenario (calm/stressed mock WAV) |
+| **Multimodal Analysis tab** | Pre-fill text + audio simultaneously using scenario presets |
+| **LIME Text Highlighter** | Words highlighted red (deception cues) or green (truth cues) proportional to LIME weights; hover for exact score |
+| **Confidence Gauge** | Real-time Plotly gauge meter showing lie probability (0–100%) |
+| **Verdict Badges** | Animated gradient badges: DECEPTION LIKELY / LIKELY TRUTHFUL / UNCERTAIN |
+| **Audio Feature Tooltips** | Expandable explanations for Jitter, Shimmer, MFCC, Pitch, Pause Ratio |
+| **Word Importance Chart** | Horizontal LIME bar chart showing top contributing words |
+| **SHAP Audio Chart** | Vertical SHAP bar chart for top audio features |
+| **Session Analytics tab** | Verdict distribution pie chart, confidence trend line, and analysis history table |
+| **Model Settings sidebar** | Choose NLP model (RoBERTa / BERT / DeBERTa) and fusion method (Hybrid / Late / Early) |
 
 ---
 
@@ -279,6 +294,26 @@ uvicorn api.main:app --reload --port 8000
 
 # Start Streamlit dashboard (new terminal)
 streamlit run dashboard/app.py --server.port 8501
+```
+
+> **Tip:** The dashboard runs in **Demo Mode** by default — no API server needed to explore features. Disable Demo Mode in the sidebar to connect to the live backend.
+
+### Using a Python Virtual Environment (Recommended)
+
+```bash
+# Create and activate virtual environment
+python -m venv venv
+.\venv\Scripts\activate        # Windows
+source venv/bin/activate       # macOS/Linux
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start API
+.\venv\Scripts\uvicorn api.main:app --reload --port 8000
+
+# Start Dashboard (new terminal)
+.\venv\Scripts\streamlit run dashboard/app.py --server.port 8501
 ```
 
 ---
@@ -398,6 +433,10 @@ pytest tests/ -v --cov=src --cov=api --cov-report=html
 pytest tests/test_api.py -v
 pytest tests/test_nlp.py -v
 ```
+
+**Current test status:** 52 tests passing (27 API + 25 NLP)
+
+> **Note:** Audio prediction tests require `soundfile` to be installed. Use the virtual environment with the full `requirements.txt` to avoid missing-module errors.
 
 ---
 
