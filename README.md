@@ -11,17 +11,17 @@
 
 **Production-ready multimodal AI system for deception likelihood estimation using NLP + Voice Analysis**
 
-[🚀 Quick Start](#quick-start) · [📖 API Docs](#api-documentation) · [🏗 Architecture](#architecture) · [⚠️ Ethics](#ethical-disclaimer)
+[ Quick Start](#quick-start) · [ API Docs](#api-documentation) · [ Architecture](#architecture) · [ Ethics](#ethical-disclaimer)
 
 </div>
 
 ---
 
-> ⚠️ **Ethical Disclaimer**: This system provides **probabilistic deception likelihood estimates** based on statistical patterns. It is NOT a definitive lie detector and must never be used for legal, criminal, employment, or high-stakes decisions. See [docs/ethics_and_bias.md](docs/ethics_and_bias.md).
+> **Ethical Disclaimer**: This system provides **probabilistic deception likelihood estimates** based on statistical patterns. It is NOT a definitive lie detector and must never be used for legal, criminal, employment, or high-stakes decisions. See [docs/ethics_and_bias.md](docs/ethics_and_bias.md).
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 Welcome to the AI-Powered Lie Detection System! This repository contains a complete end-to-end AI pipeline that:
 - Analyzes **text statements** for deception-correlated linguistic patterns
@@ -34,175 +34,175 @@ Welcome to the AI-Powered Lie Detection System! This repository contains a compl
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ```mermaid
 graph TD
-    classDef input fill:#1E293B,stroke:#3B82F6,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
-    classDef processing fill:#1E293B,stroke:#10B981,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
-    classDef fusion fill:#1E293B,stroke:#F59E0B,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
-    classDef output fill:#1E293B,stroke:#EF4444,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
-    classDef system fill:#0F172A,stroke:#64748B,stroke-width:1px,color:#F8FAFC,rx:15,ry:15;
+ classDef input fill:#1E293B,stroke:#3B82F6,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
+ classDef processing fill:#1E293B,stroke:#10B981,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
+ classDef fusion fill:#1E293B,stroke:#F59E0B,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
+ classDef output fill:#1E293B,stroke:#EF4444,stroke-width:2px,color:#F8FAFC,rx:10,ry:10;
+ classDef system fill:#0F172A,stroke:#64748B,stroke-width:1px,color:#F8FAFC,rx:15,ry:15;
 
-    subgraph Input_Layer ["📥 Data Input"]
-        direction LR
-        T["📝 Text Statement"]:::input
-        V["🎙️ Voice Recording"]:::input
-    end
+ subgraph Input_Layer [" Data Input"]
+ direction LR
+ T[" Text Statement"]:::input
+ V[" Voice Recording"]:::input
+ end
 
-    subgraph Core_Pipelines ["⚙️ Feature Pipelines"]
-        direction LR
-        subgraph NLP_Pipeline ["🧠 NLP Analysis"]
-            direction TB
-            N1["TF-IDF → LR"]:::processing
-            N2["BERT / RoBERTa"]:::processing
-            N3["DeBERTa Tuning"]:::processing
-        end
+ subgraph Core_Pipelines [" Feature Pipelines"]
+ direction LR
+ subgraph NLP_Pipeline [" NLP Analysis"]
+ direction TB
+ N1["TF-IDF → LR"]:::processing
+ N2["BERT / RoBERTa"]:::processing
+ N3["DeBERTa Tuning"]:::processing
+ end
 
-        subgraph Audio_Pipeline ["🔊 Audio Analysis"]
-            direction TB
-            A1["MFCC + Chroma"]:::processing
-            A2["Pitch + Jitter"]:::processing
-            A3["CNN-LSTM"]:::processing
-        end
-    end
+ subgraph Audio_Pipeline [" Audio Analysis"]
+ direction TB
+ A1["MFCC + Chroma"]:::processing
+ A2["Pitch + Jitter"]:::processing
+ A3["CNN-LSTM"]:::processing
+ end
+ end
 
-    subgraph Fusion_Layer ["🔀 Multi-Modal Fusion"]
-        F1["Late Fusion (Voting)"]:::fusion
-        F2["Early Fusion (Concat)"]:::fusion
-        F3["Hybrid Cross-Modal Attention"]:::fusion
-    end
+ subgraph Fusion_Layer [" Multi-Modal Fusion"]
+ F1["Late Fusion (Voting)"]:::fusion
+ F2["Early Fusion (Concat)"]:::fusion
+ F3["Hybrid Cross-Modal Attention"]:::fusion
+ end
 
-    subgraph Explainability ["🔍 Explainability & Verdict"]
-        direction LR
-        X1["LIME (Word Importance)"]:::output
-        X2["SHAP (Feature Importance)"]:::output
-        O1["📊 Confidence Score"]:::output
-        O2["✅ Final Verdict"]:::output
-    end
+ subgraph Explainability [" Explainability & Verdict"]
+ direction LR
+ X1["LIME (Word Importance)"]:::output
+ X2["SHAP (Feature Importance)"]:::output
+ O1[" Confidence Score"]:::output
+ O2[" Final Verdict"]:::output
+ end
 
-    subgraph APIs ["🚀 Deployment"]
-        direction LR
-        API["⚡ FastAPI (REST & WS)"]:::system
-        UI["🖥️ Streamlit Dashboard"]:::system
-    end
+ subgraph APIs [" Deployment"]
+ direction LR
+ API[" FastAPI (REST & WS)"]:::system
+ UI[" Streamlit Dashboard"]:::system
+ end
 
-    T --> NLP_Pipeline
-    V --> Audio_Pipeline
+ T --> NLP_Pipeline
+ V --> Audio_Pipeline
 
-    N1 & N2 & N3 --> F1 & F2 & F3
-    A1 & A2 & A3 --> F1 & F2 & F3
+ N1 & N2 & N3 --> F1 & F2 & F3
+ A1 & A2 & A3 --> F1 & F2 & F3
 
-    F1 & F2 & F3 --> X1 & X2 & O1 & O2
+ F1 & F2 & F3 --> X1 & X2 & O1 & O2
 
-    X1 & X2 & O1 & O2 --> API
-    API <--> UI
+ X1 & X2 & O1 & O2 --> API
+ API <--> UI
 
-    class Input_Layer,Core_Pipelines,Fusion_Layer,Explainability,APIs system;
+ class Input_Layer,Core_Pipelines,Fusion_Layer,Explainability,APIs system;
 ```
 
 ---
 
-## 📊 Relational Database Schema (ER Diagram)
+## Relational Database Schema (ER Diagram)
 
 While the default system serves predictions statelessly, production deployments integrate a relational database to log predictions, audit sessions, and track long-term statistics. Below is the designed schema:
 
 ```mermaid
 erDiagram
-    USERS ||--o{ SESSIONS : conducts
-    SESSIONS ||--o{ STATEMENTS : contains
-    STATEMENTS ||--|| PREDICTIONS : analyzes
-    PREDICTIONS ||--|| EXPLANATIONS : explains
+ USERS ||--o{ SESSIONS : conducts
+ SESSIONS ||--o{ STATEMENTS : contains
+ STATEMENTS ||--|| PREDICTIONS : analyzes
+ PREDICTIONS ||--|| EXPLANATIONS : explains
 
-    USERS {
-        int id PK
-        string username
-        string password_hash
-        string role
-        datetime created_at
-    }
+ USERS {
+ int id PK
+ string username
+ string password_hash
+ string role
+ datetime created_at
+ }
 
-    SESSIONS {
-        string session_id PK
-        int interviewer_id FK
-        string participant_name
-        string notes
-        datetime created_at
-    }
+ SESSIONS {
+ string session_id PK
+ int interviewer_id FK
+ string participant_name
+ string notes
+ datetime created_at
+ }
 
-    STATEMENTS {
-        string statement_id PK
-        string session_id FK
-        string text_content
-        string audio_path
-        datetime timestamp
-    }
+ STATEMENTS {
+ string statement_id PK
+ string session_id FK
+ string text_content
+ string audio_path
+ datetime timestamp
+ }
 
-    PREDICTIONS {
-        string prediction_id PK
-        string statement_id FK
-        string text_prediction
-        float lie_probability
-        float truth_probability
-        string voice_prediction
-        float stress_probability
-        string final_prediction
-        float confidence
-        string fusion_method
-        float processing_time_ms
-        datetime created_at
-    }
+ PREDICTIONS {
+ string prediction_id PK
+ string statement_id FK
+ string text_prediction
+ float lie_probability
+ float truth_probability
+ string voice_prediction
+ float stress_probability
+ string final_prediction
+ float confidence
+ string fusion_method
+ float processing_time_ms
+ datetime created_at
+ }
 
-    EXPLANATIONS {
-        string explanation_id PK
-        string prediction_id FK
-        string method_used
-        json important_words
-        json audio_features
-    }
+ EXPLANATIONS {
+ string explanation_id PK
+ string prediction_id FK
+ string method_used
+ json important_words
+ json audio_features
+ }
 ```
 
 ---
 
-## 🔄 System Run-time Flow
+## System Run-time Flow
 
 The sequence diagram below illustrates the end-to-end communication flow between the user, frontend dashboard, backend API, caching layer, and machine learning components:
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    actor User
-    participant UI as Streamlit Dashboard
-    participant API as FastAPI Gateway
-    participant Cache as Redis
-    participant NLP as RoBERTa NLP Pipeline
-    participant Audio as CNN-LSTM Audio Pipeline
-    participant Fusion as Multimodal Fusion
+ autonumber
+ actor User
+ participant UI as Streamlit Dashboard
+ participant API as FastAPI Gateway
+ participant Cache as Redis
+ participant NLP as RoBERTa NLP Pipeline
+ participant Audio as CNN-LSTM Audio Pipeline
+ participant Fusion as Multimodal Fusion
 
-    User->>UI: Submit Text + Audio Recording
-    UI->>API: POST /predict/multimodal (FormData)
-    API->>Cache: Check for cached prediction
-    alt Cache Hit
-        Cache-->>API: Return cached result
-    else Cache Miss
-        par Text Pipeline
-            API->>NLP: Predict lie probability
-            NLP-->>API: Return text scores & LIME weights
-        and Audio Pipeline
-            API->>Audio: Extract features & predict stress
-            Audio-->>API: Return stress scores & SHAP weights
-        end
-        API->>Fusion: Combine scores (Late/Hybrid Attention)
-        Fusion-->>API: Return final deception likelihood & verdict
-        API->>Cache: Cache results (TTL)
-    end
-    API-->>UI: Return JSON Response
-    UI-->>User: Render Gauge Meter, charts & Verdict
+ User->>UI: Submit Text + Audio Recording
+ UI->>API: POST /predict/multimodal (FormData)
+ API->>Cache: Check for cached prediction
+ alt Cache Hit
+ Cache-->>API: Return cached result
+ else Cache Miss
+ par Text Pipeline
+ API->>NLP: Predict lie probability
+ NLP-->>API: Return text scores & LIME weights
+ and Audio Pipeline
+ API->>Audio: Extract features & predict stress
+ Audio-->>API: Return stress scores & SHAP weights
+ end
+ API->>Fusion: Combine scores (Late/Hybrid Attention)
+ Fusion-->>API: Return final deception likelihood & verdict
+ API->>Cache: Cache results (TTL)
+ end
+ API-->>UI: Return JSON Response
+ UI-->>User: Render Gauge Meter, charts & Verdict
 ```
 
 ---
 
-## 🖥️ Streamlit Dashboard
+## Streamlit Dashboard
 
 The dashboard has been fully redesigned with a **premium dark glassmorphism theme**. It runs entirely in **Demo Mode** (no API key required) using realistic mock predictions, making it easy to explore all features out of the box.
 
@@ -225,37 +225,37 @@ The dashboard has been fully redesigned with a **premium dark glassmorphism them
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 AI-Powered-Lie-Detection/
 ├── src/
-│   ├── nlp/                  # NLP pipeline (TF-IDF → RoBERTa)
-│   ├── audio/                # Audio pipeline (MFCC, CNN-LSTM)
-│   ├── fusion/               # Multimodal fusion models
-│   ├── explainability/       # SHAP + LIME
-│   ├── evaluation/           # Metrics + visualizations
-│   ├── data/                 # Dataset loaders
-│   └── utils/                # Config, logger, helpers
-├── api/                      # FastAPI backend
-│   ├── main.py               # Application entry point
-│   ├── routers/              # Prediction, explain, health routers
-│   └── models/               # Pydantic schemas
+│ ├── nlp/ # NLP pipeline (TF-IDF → RoBERTa)
+│ ├── audio/ # Audio pipeline (MFCC, CNN-LSTM)
+│ ├── fusion/ # Multimodal fusion models
+│ ├── explainability/ # SHAP + LIME
+│ ├── evaluation/ # Metrics + visualizations
+│ ├── data/ # Dataset loaders
+│ └── utils/ # Config, logger, helpers
+├── api/ # FastAPI backend
+│ ├── main.py # Application entry point
+│ ├── routers/ # Prediction, explain, health routers
+│ └── models/ # Pydantic schemas
 ├── dashboard/
-│   └── app.py                # Streamlit dashboard
+│ └── app.py # Streamlit dashboard
 ├── mlops/
-│   ├── Dockerfile            # API Docker image
-│   ├── Dockerfile.dashboard  # Dashboard Docker image
-│   └── docker-compose.yml    # Full stack orchestration
-├── configs/                  # YAML configuration files
-├── tests/                    # Unit + integration tests
-├── docs/                     # Ethics, research, dataset guides
-└── .github/workflows/        # CI/CD pipelines
+│ ├── Dockerfile # API Docker image
+│ ├── Dockerfile.dashboard # Dashboard Docker image
+│ └── docker-compose.yml # Full stack orchestration
+├── configs/ # YAML configuration files
+├── tests/ # Unit + integration tests
+├── docs/ # Ethics, research, dataset guides
+└── .github/workflows/ # CI/CD pipelines
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Option 1: Docker Compose (Recommended)
 
@@ -272,9 +272,9 @@ cd mlops
 docker-compose up --build
 
 # Services:
-# API:       http://localhost:8000
+# API: http://localhost:8000
 # Dashboard: http://localhost:8501
-# Docs:      http://localhost:8000/docs
+# Docs: http://localhost:8000/docs
 ```
 
 ### Option 2: Local Development
@@ -303,8 +303,8 @@ streamlit run dashboard/app.py --server.port 8501
 ```bash
 # Create and activate virtual environment
 python -m venv venv
-.\venv\Scripts\activate        # Windows
-source venv/bin/activate       # macOS/Linux
+.\venv\Scripts\activate # Windows
+source venv/bin/activate # macOS/Linux
 
 # Install dependencies
 pip install -r requirements.txt
@@ -318,7 +318,7 @@ pip install -r requirements.txt
 
 ---
 
-## 🤖 NLP Models
+## NLP Models
 
 | Model | Type | F1 (LIAR) | ROC-AUC | GPU Required |
 |-------|------|-----------|---------|--------------|
@@ -333,15 +333,15 @@ pip install -r requirements.txt
 ```bash
 # Download LIAR dataset and train all NLP models
 python -m src.nlp.trainer \
-  --data data/raw/liar/train.tsv \
-  --transformers \
-  --model roberta-base \
-  --epochs 5
+ --data data/raw/liar/train.tsv \
+ --transformers \
+ --model roberta-base \
+ --epochs 5
 ```
 
 ---
 
-## 🎙 Audio Models
+## Audio Models
 
 | Model | Type | F1 | ROC-AUC |
 |-------|------|-----|---------|
@@ -365,7 +365,7 @@ python -m src.nlp.trainer \
 
 ---
 
-## 🔀 Fusion Methods
+## Fusion Methods
 
 | Method | Description | F1 | AUC |
 |--------|-------------|-----|-----|
@@ -375,7 +375,7 @@ python -m src.nlp.trainer \
 
 ---
 
-## 🌐 API Documentation
+## API Documentation
 
 ### POST /predict/text
 ```json
@@ -384,46 +384,46 @@ python -m src.nlp.trainer \
 
 // Response
 {
-  "text_prediction": "lie",
-  "confidence": 0.73,
-  "lie_probability": 0.73,
-  "truth_probability": 0.27,
-  "verdict": "possibly_lie",
-  "model_used": "roberta",
-  "explanation": {
-    "important_words": [
-      {"word": "entire", "weight": 0.12, "direction": "lie"},
-      {"word": "evening", "weight": 0.08, "direction": "lie"}
-    ]
-  }
+ "text_prediction": "lie",
+ "confidence": 0.73,
+ "lie_probability": 0.73,
+ "truth_probability": 0.27,
+ "verdict": "possibly_lie",
+ "model_used": "roberta",
+ "explanation": {
+ "important_words": [
+ {"word": "entire", "weight": 0.12, "direction": "lie"},
+ {"word": "evening", "weight": 0.08, "direction": "lie"}
+ ]
+ }
 }
 ```
 
 ### POST /predict/multimodal
 ```bash
 curl -X POST http://localhost:8000/predict/multimodal \
-  -F "text=I was at home all night" \
-  -F "file=@recording.wav" \
-  -F "fusion_method=hybrid"
+ -F "text=I was at home all night" \
+ -F "file=@recording.wav" \
+ -F "fusion_method=hybrid"
 ```
 
 ```json
 // Response
 {
-  "text_prediction": "lie",
-  "voice_prediction": "stress_detected",
-  "final_prediction": "likely_lie",
-  "confidence": 0.81,
-  "explanation": {
-    "important_words": [...],
-    "audio_features": [...]
-  }
+ "text_prediction": "lie",
+ "voice_prediction": "stress_detected",
+ "final_prediction": "likely_lie",
+ "confidence": 0.81,
+ "explanation": {
+ "important_words": [...],
+ "audio_features": [...]
+ }
 }
 ```
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests with coverage
@@ -440,7 +440,7 @@ pytest tests/test_nlp.py -v
 
 ---
 
-## 🐳 Docker Commands
+## Docker Commands
 
 ```bash
 # Build and start all services
@@ -458,7 +458,7 @@ docker-compose -f mlops/docker-compose.yml down
 
 ---
 
-## 🔬 Explainability (XAI)
+## Explainability (XAI)
 
 ### LIME Text Explanation
 ```python
@@ -481,18 +481,18 @@ result = explainer.explain_instance(x_audio)
 
 ---
 
-## 📝 Example Test Cases
+## Example Test Cases
 
 You can test the API or Dashboard with these sample statements. Note that the model looks for linguistic cues (e.g., over-justification, distancing language, absolute terms).
 
-### 🔴 Likely Deceptive (Expected: Lie)
+### Likely Deceptive (Expected: Lie)
 1. **The Alibi:** "I was definitely at home the entire night and never left, not even once. You can ask my dog."
 2. **The Denial:** "I have absolutely no idea how that money disappeared from the account, I swear I never touched it."
 3. **The Distancing:** "I never met that person in my entire life, I don't even know who they are talking about."
 4. **The Over-Justification:** "I am always completely honest. Everyone knows I am the most trustworthy person in this office, so I wouldn't do that."
 5. **The Evasion:** "I categorically did not send that email to the competitor, I wasn't even near my computer at that time of the day."
 
-### 🟢 Likely Truthful (Expected: Truth)
+### Likely Truthful (Expected: Truth)
 6. **Routine Action:** "I went to the grocery store around 3pm, bought some milk and bread, and came back home by 4."
 7. **Admitting Minor Fault:** "I forgot to submit the report on Friday because I had a doctor's appointment in the afternoon and completely lost track of time."
 8. **Simple Fact:** "The meeting was rescheduled to Tuesday. I got the notification but missed forwarding it to the team."
@@ -501,7 +501,7 @@ You can test the API or Dashboard with these sample statements. Note that the mo
 
 ---
 
-## 🔭 Research Extensions
+## Research Extensions
 
 | Direction | Technology | Expected Gain |
 |-----------|-----------|---------------|
@@ -514,7 +514,7 @@ You can test the API or Dashboard with these sample statements. Note that the mo
 
 ---
 
-## 📊 Dataset Guide
+## Dataset Guide
 
 See [docs/dataset_guide.md](docs/dataset_guide.md) for detailed dataset descriptions.
 
@@ -527,7 +527,7 @@ See [docs/dataset_guide.md](docs/dataset_guide.md) for detailed dataset descript
 
 ---
 
-## ⚖️ Ethical Disclaimer
+## Ethical Disclaimer
 
 This system is a **research prototype** for studying deception-correlated patterns. Key limitations:
 
@@ -541,13 +541,13 @@ Full ethical analysis: [docs/ethics_and_bias.md](docs/ethics_and_bias.md)
 
 ---
 
-## 📄 License
+## License
 
 MIT License — See [LICENSE](LICENSE) for details.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -559,5 +559,5 @@ MIT License — See [LICENSE](LICENSE) for details.
 ---
 
 <div align="center">
-Built with 🔬 for research purposes | ⚠️ Not for production use in high-stakes decisions
+Built with for research purposes | Not for production use in high-stakes decisions
 </div>
