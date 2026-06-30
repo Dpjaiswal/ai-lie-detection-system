@@ -23,7 +23,7 @@
 
 ## 🎯 Project Overview
 
-A complete end-to-end AI pipeline that:
+Welcome to the AI-Powered Lie Detection System! This repository contains a complete end-to-end AI pipeline that:
 - Analyzes **text statements** for deception-correlated linguistic patterns
 - Analyzes **voice recordings** for stress indicators (pitch, jitter, shimmer, MFCC)
 - **Fuses both modalities** via cross-modal attention for a final verdict
